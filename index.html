@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bogenparcours Score</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#3F5B3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{ margin:0; padding:0; }
+  *{ -webkit-tap-highlight-color: transparent; }
+</style>
+<style>
+  :root{
+    --bg:#F3F4EF;
+    --surface:#FFFFFF;
+    --surface-2:#EAEBE3;
+    --border:#DCDED3;
+    --text:#202A1E;
+    --muted:#69725F;
+    --accent:#3F5B3A;
+    --accent-ink:#FFFFFF;
+    --gold:#C99A2E;
+    --danger:#B5382F;
+    --danger-surface:#F7E7E4;
+    --shadow: 0 1px 2px rgba(32,42,30,0.06), 0 4px 14px rgba(32,42,30,0.07);
+    --v1-bg:#DCEEDD; --v1-fg:#276B3B;
+    --v2-bg:#E7F0D9; --v2-fg:#4C6B23;
+    --v3-bg:#F5E6C2; --v3-fg:#8A6412;
+    --v5-bg:#F6DBD7; --v5-fg:#A3382D;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#161A14;
+      --surface:#20261C;
+      --surface-2:#2A3123;
+      --border:#39422F;
+      --text:#EDF0E6;
+      --muted:#A2AB94;
+      --accent:#7FA870;
+      --accent-ink:#0F140D;
+      --gold:#E0B44E;
+      --danger:#E17368;
+      --danger-surface:#3A211E;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+      --v1-bg:#25422C; --v1-fg:#8FD79C;
+      --v2-bg:#333F22; --v2-fg:#C4DA8C;
+      --v3-bg:#4A3B1C; --v3-fg:#E8C266;
+      --v5-bg:#452420; --v5-fg:#F0958A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#161A14;
+    --surface:#20261C;
+    --surface-2:#2A3123;
+    --border:#39422F;
+    --text:#EDF0E6;
+    --muted:#A2AB94;
+    --accent:#7FA870;
+    --accent-ink:#0F140D;
+    --gold:#E0B44E;
+    --danger:#E17368;
+    --danger-surface:#3A211E;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+    --v1-bg:#25422C; --v1-fg:#8FD79C;
+    --v2-bg:#333F22; --v2-fg:#C4DA8C;
+    --v3-bg:#4A3B1C; --v3-fg:#E8C266;
+    --v5-bg:#452420; --v5-fg:#F0958A;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding-inline:16px;
+    padding-block: 12px;
+  }
+  #app{
+    max-width:520px;
+    margin:0 auto;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .eyebrow{
+    font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--muted);
+  }
+  .title-row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+    margin-bottom:18px;
+  }
+  .app-name{ font-size:19px; font-weight:800; letter-spacing:-.01em; }
+  .app-sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    box-shadow:var(--shadow);
+  }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+  .field label{
+    display:block; font-size:12px; font-weight:600; color:var(--muted);
+    margin-bottom:6px;
+  }
+  input[type="text"], input[type="date"], select{
+    width:100%;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--text);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  input:focus, select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .player-row{ display:flex; gap:8px; align-items:center; }
+  .player-row input{ flex:1; }
+  .icon-btn{
+    width:38px; height:38px; flex:0 0 auto;
+    border-radius:10px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--text); font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:active{ transform: scale(0.96); }
+
+  button.primary{
+    width:100%;
+    background:var(--accent); color:var(--accent-ink);
+    border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:700;
+    font-family:inherit; cursor:pointer;
+  }
+  button.primary:disabled{ opacity:.45; }
+  button.secondary{
+    width:100%;
+    background:transparent; color:var(--accent);
+    border:1.5px solid var(--accent); border-radius:12px; padding:12px; font-size:14px; font-weight:700;
+    font-family:inherit; cursor:pointer;
+  }
+  button.ghost{
+    background:none; border:none; color:var(--muted); font-family:inherit;
+    font-size:13px; font-weight:600; cursor:pointer; padding:8px;
+  }
+  button.dashed{
+    width:100%; background:none; border:1.5px dashed var(--border); border-radius:10px;
+    padding:10px; color:var(--muted); font-family:inherit; font-weight:600; font-size:13px;
+    cursor:pointer;
+  }
+
+  /* Player tabs */
+  .tabs{
+    display:flex; gap:6px; overflow-x:auto; padding:4px 0 10px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{
+    flex:0 0 auto; padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700;
+    background:var(--surface); border:1px solid var(--border); color:var(--muted);
+    white-space:nowrap; cursor:pointer;
+  }
+  .tab.active{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+
+  .totalbar{
+    position:sticky; top: env(safe-area-inset-top, 0px);
+    background:var(--bg);
+    padding-top:10px; padding-bottom: 6px;
+    z-index:5;
+  }
+  .totalbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:12px 16px; box-shadow:var(--shadow);
+  }
+  .total-num{ font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .total-label{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .progress-pill{ font-size:12px; font-weight:700; color:var(--muted); }
+
+  .station-row{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--border);
+  }
+  .station-row:last-child{ border-bottom:none; }
+  .station-no{
+    width:30px; flex:0 0 auto; font-size:13px; font-weight:800; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .targets{
+    flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
+  }
+  .targets select{ padding:8px 2px; text-align:center; font-weight:700; font-size:14px; }
+  .row-sum{
+    width:30px; flex:0 0 auto; text-align:right; font-weight:800; font-variant-numeric:tabular-nums;
+    color:var(--text); font-size:14px;
+  }
+  .target-legend{
+    display:flex; gap:10px; font-size:11px; color:var(--muted); padding:2px 0 12px;
+    flex-wrap:wrap;
+  }
+  .target-legend b{ color:var(--text); }
+
+  /* Bottom nav */
+  .bottomnav{
+    position:fixed; left:0; right:0; bottom:0;
+    background:var(--surface); border-top:1px solid var(--border);
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
+    display:flex; gap:8px; max-width:520px; margin:0 auto;
+  }
+  .navbtn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+    background:none; border:none; font-family:inherit; cursor:pointer;
+    color:var(--muted); font-size:11px; font-weight:700; padding:6px;
+    border-radius:10px;
+  }
+  .navbtn.active{ color:var(--accent); }
+  .navbtn .dot{ width:20px; height:20px; }
+
+  /* Summary */
+  .rank-list{ display:flex; flex-direction:column; gap:8px; }
+  .rank-item{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface-2); border-radius:12px; padding:10px 12px;
+  }
+  .rank-item.first{ background: color-mix(in srgb, var(--gold) 18%, var(--surface-2)); }
+  .rank-pos{
+    width:24px; height:24px; border-radius:999px; background:var(--surface);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800; flex:0 0 auto;
+  }
+  .rank-name{ flex:1; font-weight:700; font-size:14px; }
+  .rank-total{ font-weight:800; font-variant-numeric:tabular-nums; }
+
+  /* History */
+  .round-card{ margin-bottom:12px; }
+  .round-head{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+  }
+  .round-date{ font-weight:800; font-size:14px; }
+  .trash{
+    background:none; border:none; color:var(--muted); cursor:pointer; padding:6px;
+    font-size:15px;
+  }
+  .confirm-row{
+    display:flex; gap:8px; align-items:center; justify-content:flex-end;
+    background:var(--danger-surface); border-radius:10px; padding:8px 10px; margin-top:8px;
+  }
+  .confirm-row span{ font-size:12px; color:var(--danger); font-weight:700; margin-right:auto; }
+  .btn-sm{
+    border:none; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700;
+    font-family:inherit; cursor:pointer;
+  }
+  .btn-sm.confirm{ background:var(--danger); color:#fff; }
+  .btn-sm.cancel{ background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+
+  .empty{
+    text-align:center; color:var(--muted); font-size:13px; padding:40px 16px;
+  }
+
+  /* Detail view */
+  .round-card.clickable{ cursor:pointer; }
+  .round-card.clickable:active{ transform: scale(0.995); }
+  .chevron{ color:var(--muted); font-size:16px; }
+  .detail-header{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .detail-header h2{ font-size:17px; }
+  .detail-stats{ display:flex; gap:10px; margin-bottom:14px; }
+  .stat-card{ flex:1; background:var(--surface-2); border-radius:12px; padding:10px 12px; }
+  .stat-card .stat-label{ font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .stat-card .stat-value{ font-size:14px; font-weight:800; margin-top:3px; }
+  .stat-card.good .stat-value{ color:var(--v1-fg); }
+  .stat-card.bad .stat-value{ color:var(--v5-fg); }
+  .badge-legend{
+    display:flex; gap:10px; font-size:11px; color:var(--muted); padding:2px 0 12px; flex-wrap:wrap;
+    align-items:center;
+  }
+  .badge-legend .chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:18px; height:18px; border-radius:5px; font-size:10px; font-weight:800; margin-right:4px;
+  }
+  .badge-row{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 0; border-bottom:1px solid var(--border);
+  }
+  .badge-row:last-child{ border-bottom:none; }
+  .badge-row .station-no{ width:30px; }
+  .badges{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .badge{
+    height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:13px; background:var(--surface-2); color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .badge.v1{ background:var(--v1-bg); color:var(--v1-fg); }
+  .badge.v2{ background:var(--v2-bg); color:var(--v2-fg); }
+  .badge.v3{ background:var(--v3-bg); color:var(--v3-fg); }
+  .badge.v5{ background:var(--v5-bg); color:var(--v5-fg); }
+  .badge-row .row-sum.worst{ color:var(--v5-fg); }
+  .badge-row .row-sum.best{ color:var(--v1-fg); }
+  .toast{
+    position:fixed; left:50%; bottom: calc(96px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);
+    background:var(--text); color:var(--bg);
+    padding:10px 16px; border-radius:999px; font-size:13px; font-weight:700;
+    box-shadow:var(--shadow); z-index:20; transition:opacity .25s;
+  }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.4);
+    display:flex; align-items:flex-end; justify-content:center; z-index:30;
+  }
+  .modal{
+    background:var(--surface); border-radius:18px 18px 0 0;
+    width:100%; max-width:520px; padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));
+    box-shadow:var(--shadow);
+  }
+  .modal h3{ margin-bottom:8px; }
+  .modal p{ color:var(--muted); font-size:13px; margin:0 0 16px; }
+  .modal .row{ display:flex; gap:10px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="title-row">
+    <div>
+      <div class="app-name">🏹 Bogenparcours</div>
+      <div class="app-sub" id="subtitle">Punkte-Tracker &middot; 32 Stationen</div>
+    </div>
+  </div>
+
+  <!-- SETUP VIEW -->
+  <section id="view-setup">
+    <div class="card stack">
+      <div class="field">
+        <label for="setup-date">Datum</label>
+        <input type="date" id="setup-date">
+      </div>
+      <div class="field">
+        <label>Schützen</label>
+        <div id="player-inputs" class="stack"></div>
+        <button class="dashed" id="add-player" type="button" style="margin-top:8px;">+ Schütze hinzufügen</button>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <button class="primary" id="start-round">Runde starten</button>
+  </section>
+
+  <!-- SCORING VIEW -->
+  <section id="view-scoring" hidden>
+    <div class="totalbar">
+      <div class="totalbar-inner">
+        <div>
+          <div class="total-label" id="scoring-player-label">Punkte</div>
+          <div class="total-num"><span id="scoring-total">0</span></div>
+        </div>
+        <div class="progress-pill" id="scoring-progress">0 / 32 Stationen</div>
+      </div>
+    </div>
+    <div class="tabs" id="player-tabs"></div>
+    <div class="target-legend">
+      <span><b>1–3</b> = Treffer beim 1./2./3. Schuss</span>
+      <span><b>5</b> = kein Treffer</span>
+    </div>
+    <div class="card" id="station-list" style="padding:4px 14px;"></div>
+    <div style="height:16px"></div>
+    <button class="primary" id="finish-round">Runde abschließen</button>
+    <div style="height:8px"></div>
+    <button class="ghost" id="cancel-round" style="width:100%;">Runde verwerfen</button>
+  </section>
+
+  <!-- SUMMARY VIEW -->
+  <section id="view-summary" hidden>
+    <div class="card stack">
+      <div class="eyebrow" id="summary-date">Datum</div>
+      <h2>Ergebnis</h2>
+      <div class="rank-list" id="summary-list"></div>
+    </div>
+    <div style="height:16px"></div>
+    <button class="primary" id="summary-new">Neue Runde</button>
+    <div style="height:8px"></div>
+    <button class="secondary" id="summary-history">Zum Verlauf</button>
+  </section>
+
+  <!-- HISTORY VIEW -->
+  <section id="view-history" hidden>
+    <h2 style="margin-bottom:14px;">Verlauf</h2>
+    <div id="history-list"></div>
+  </section>
+
+  <!-- DETAIL VIEW -->
+  <section id="view-detail" hidden>
+    <div class="detail-header">
+      <button class="icon-btn" id="detail-back" type="button" aria-label="Zurück">←</button>
+      <div>
+        <div class="eyebrow" id="detail-date">Datum</div>
+        <h2>Stationsübersicht</h2>
+      </div>
+    </div>
+    <div class="tabs" id="detail-tabs"></div>
+    <div class="detail-stats" id="detail-stats"></div>
+    <div class="badge-legend">
+      <span><span class="chip" style="background:var(--v1-bg);color:var(--v1-fg);">1</span>–<span class="chip" style="background:var(--v3-bg);color:var(--v3-fg);">3</span> Treffer beim 1./2./3. Schuss</span>
+      <span><span class="chip" style="background:var(--v5-bg);color:var(--v5-fg);">5</span>kein Treffer</span>
+    </div>
+    <div class="card" id="detail-stationlist" style="padding:4px 14px;"></div>
+  </section>
+
+  <div class="bottomnav">
+    <button class="navbtn" id="nav-round" data-view="round">
+      <span>🎯</span><span>Runde</span>
+    </button>
+    <button class="navbtn" id="nav-history" data-view="history">
+      <span>📜</span><span>Verlauf</span>
+    </button>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+
+
+<script>
+(function(){
+  "use strict";
+
+  var N_STATIONS = 32;
+  var N_TARGETS = 4;
+  var LS_ROUNDS = "bp_rounds_v1";
+  var LS_CURRENT = "bp_current_v1";
+
+  // ---------- storage helpers (defensive: private mode / disabled storage) ----------
+  function lsGet(key){
+    try{
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function lsSet(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e){ return false; }
+  }
+  function lsRemove(key){
+    try{ localStorage.removeItem(key); }catch(e){}
+  }
+
+  // ---------- state ----------
+  var state = {
+    view: "setup", // setup | scoring | summary | history | detail
+    current: null, // in-progress round
+    lastFinished: null,
+    rounds: lsGet(LS_ROUNDS) || [],
+    confirmRoundId: null, // for history delete confirm
+    detailRoundId: null,
+    detailPlayerIndex: 0
+  };
+
+  function todayISO(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+m+"-"+day;
+  }
+  function formatDate(iso){
+    if(!iso) return "";
+    var p = iso.split("-");
+    if(p.length!==3) return iso;
+    return p[2]+"."+p[1]+"."+p[0];
+  }
+  function uid(){
+    return Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  }
+
+  function emptyStations(){
+    var arr = [];
+    for(var i=0;i<N_STATIONS;i++){ arr.push([null,null,null,null]); }
+    return arr;
+  }
+
+  function playerTotal(stations){
+    var sum = 0;
+    for(var i=0;i<stations.length;i++){
+      for(var j=0;j<stations[i].length;j++){
+        var v = stations[i][j];
+        if(v){ sum += v; }
+      }
+    }
+    return sum;
+  }
+  function stationsFilledCount(stations){
+    var c = 0;
+    for(var i=0;i<stations.length;i++){
+      var any=false;
+      for(var j=0;j<stations[i].length;j++){ if(stations[i][j]){ any=true; } }
+      if(any) c++;
+    }
+    return c;
+  }
+
+  // ---------- DOM refs ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var viewSetup = $("view-setup");
+  var viewScoring = $("view-scoring");
+  var viewSummary = $("view-summary");
+  var viewHistory = $("view-history");
+  var viewDetail = $("view-detail");
+  var navRound = $("nav-round");
+  var navHistory = $("nav-history");
+  var subtitle = $("subtitle");
+
+  function setViews(){
+    viewSetup.hidden = true;
+    viewScoring.hidden = true;
+    viewSummary.hidden = true;
+    viewHistory.hidden = true;
+    viewDetail.hidden = true;
+
+    if(state.view === "detail"){
+      viewDetail.hidden = false;
+      navHistory.classList.add("active");
+      navRound.classList.remove("active");
+      subtitle.textContent = "Stationsvergleich";
+      renderDetail();
+      return;
+    }
+
+    if(state.view === "history"){
+      viewHistory.hidden = false;
+      navHistory.classList.add("active");
+      navRound.classList.remove("active");
+      subtitle.textContent = state.rounds.length + " gespeicherte Runde" + (state.rounds.length===1?"":"n");
+      renderHistory();
+      return;
+    }
+
+    navRound.classList.add("active");
+    navHistory.classList.remove("active");
+
+    if(state.view === "setup"){
+      viewSetup.hidden = false;
+      subtitle.textContent = "Neue Runde anlegen";
+    } else if(state.view === "scoring"){
+      viewScoring.hidden = false;
+      subtitle.textContent = formatDate(state.current.date) + " · 32 Stationen";
+    } else if(state.view === "summary"){
+      viewSummary.hidden = false;
+      subtitle.textContent = "Runde abgeschlossen";
+    }
+  }
+
+  function goto(view){
+    state.view = view;
+    setViews();
+  }
+
+  navRound.addEventListener("click", function(){
+    if(state.current){ goto("scoring"); }
+    else if(state.lastFinished){ goto("summary"); }
+    else { goto("setup"); }
+  });
+  navHistory.addEventListener("click", function(){ goto("history"); });
+
+  // ---------- SETUP VIEW ----------
+  var playerInputs = $("player-inputs");
+  var addPlayerBtn = $("add-player");
+  var setupDate = $("setup-date");
+  var startRoundBtn = $("start-round");
+  var MAX_PLAYERS = 10;
+
+  function renderPlayerInputs(){
+    playerInputs.innerHTML = "";
+    var rows = playerInputs.querySelectorAll(".player-row").length;
+  }
+
+  function addPlayerRow(prefill){
+    var count = playerInputs.children.length;
+    if(count >= MAX_PLAYERS) return;
+    var row = document.createElement("div");
+    row.className = "player-row";
+    var input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Schütze " + (count+1);
+    input.value = prefill || "";
+    input.id = "player-input-" + count;
+    row.appendChild(input);
+    if(count > 0){
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "icon-btn";
+      rm.textContent = "−";
+      rm.setAttribute("aria-label","Schütze entfernen");
+      rm.addEventListener("click", function(){ row.remove(); renumberPlaceholders(); });
+      row.appendChild(rm);
+    }
+    playerInputs.appendChild(row);
+  }
+  function renumberPlaceholders(){
+    var rows = playerInputs.querySelectorAll(".player-row input");
+    rows.forEach(function(inp, i){
+      if(!inp.value) inp.placeholder = "Schütze " + (i+1);
+    });
+  }
+  addPlayerBtn.addEventListener("click", function(){ addPlayerRow(); });
+
+  function initSetup(){
+    setupDate.value = todayISO();
+    playerInputs.innerHTML = "";
+    addPlayerRow();
+    addPlayerRow();
+  }
+
+  startRoundBtn.addEventListener("click", function(){
+    var names = [];
+    playerInputs.querySelectorAll(".player-row input").forEach(function(inp, i){
+      var v = inp.value.trim();
+      names.push(v || ("Schütze " + (i+1)));
+    });
+    if(names.length === 0){ return; }
+    var date = setupDate.value || todayISO();
+    var round = {
+      id: uid(),
+      date: date,
+      activePlayer: 0,
+      players: names.map(function(n){ return { name: n, stations: emptyStations() }; })
+    };
+    state.current = round;
+    lsSet(LS_CURRENT, round);
+    renderScoring();
+    goto("scoring");
+  });
+
+  // ---------- SCORING VIEW ----------
+  var playerTabs = $("player-tabs");
+  var stationList = $("station-list");
+  var scoringTotal = $("scoring-total");
+  var scoringProgress = $("scoring-progress");
+  var scoringPlayerLabel = $("scoring-player-label");
+  var finishRoundBtn = $("finish-round");
+  var cancelRoundBtn = $("cancel-round");
+
+  function renderScoring(){
+    var round = state.current;
+    if(!round) return;
+
+    playerTabs.innerHTML = "";
+    round.players.forEach(function(p, i){
+      var tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "tab" + (i === round.activePlayer ? " active" : "");
+      tab.textContent = p.name;
+      tab.addEventListener("click", function(){
+        round.activePlayer = i;
+        lsSet(LS_CURRENT, round);
+        renderScoring();
+      });
+      playerTabs.appendChild(tab);
+    });
+
+    var active = round.players[round.activePlayer];
+    scoringPlayerLabel.textContent = active.name;
+    scoringTotal.textContent = playerTotal(active.stations);
+    scoringProgress.textContent = stationsFilledCount(active.stations) + " / " + N_STATIONS + " Stationen";
+
+    stationList.innerHTML = "";
+    for(var s=0; s<N_STATIONS; s++){
+      (function(s){
+        var row = document.createElement("div");
+        row.className = "station-row";
+
+        var no = document.createElement("div");
+        no.className = "station-no";
+        no.textContent = s+1;
+        row.appendChild(no);
+
+        var targets = document.createElement("div");
+        targets.className = "targets";
+        for(var t=0;t<N_TARGETS;t++){
+          (function(t){
+            var sel = document.createElement("select");
+            sel.setAttribute("aria-label", "Station " + (s+1) + " Ziel " + (t+1));
+            var opts = ["", "1", "2", "3", "5"];
+            opts.forEach(function(o){
+              var opt = document.createElement("option");
+              opt.value = o;
+              opt.textContent = o === "" ? "–" : o;
+              sel.appendChild(opt);
+            });
+            var val = active.stations[s][t];
+            sel.value = val ? String(val) : "";
+            sel.addEventListener("change", function(){
+              active.stations[s][t] = sel.value ? parseInt(sel.value,10) : null;
+              lsSet(LS_CURRENT, round);
+              rowSum.textContent = sumRow(active.stations[s]);
+              scoringTotal.textContent = playerTotal(active.stations);
+              scoringProgress.textContent = stationsFilledCount(active.stations) + " / " + N_STATIONS + " Stationen";
+            });
+            targets.appendChild(sel);
+          })(t);
+        }
+        row.appendChild(targets);
+
+        var rowSum = document.createElement("div");
+        rowSum.className = "row-sum";
+        rowSum.textContent = sumRow(active.stations[s]);
+        row.appendChild(rowSum);
+
+        stationList.appendChild(row);
+      })(s);
+    }
+  }
+  function sumRow(row){
+    var s = 0;
+    for(var i=0;i<row.length;i++){ if(row[i]) s += row[i]; }
+    return s;
+  }
+
+  finishRoundBtn.addEventListener("click", function(){
+    showModal({
+      title: "Runde abschließen?",
+      text: "Die Ergebnisse werden gespeichert und stehen im Verlauf zur Verfügung.",
+      confirmLabel: "Abschließen",
+      onConfirm: function(){
+        var round = state.current;
+        var finished = {
+          id: round.id,
+          date: round.date,
+          players: round.players.map(function(p){
+            return { name: p.name, stations: p.stations, total: playerTotal(p.stations) };
+          })
+        };
+        state.rounds.unshift(finished);
+        lsSet(LS_ROUNDS, state.rounds);
+        state.lastFinished = finished;
+        state.current = null;
+        lsRemove(LS_CURRENT);
+        renderSummary(finished);
+        goto("summary");
+      }
+    });
+  });
+
+  cancelRoundBtn.addEventListener("click", function(){
+    showModal({
+      title: "Runde verwerfen?",
+      text: "Alle bisher eingetragenen Punkte dieser Runde gehen verloren.",
+      confirmLabel: "Verwerfen",
+      danger: true,
+      onConfirm: function(){
+        state.current = null;
+        lsRemove(LS_CURRENT);
+        initSetup();
+        goto("setup");
+      }
+    });
+  });
+
+  // ---------- SUMMARY VIEW ----------
+  var summaryDate = $("summary-date");
+  var summaryList = $("summary-list");
+  $("summary-new").addEventListener("click", function(){ initSetup(); goto("setup"); });
+  $("summary-history").addEventListener("click", function(){ goto("history"); });
+
+  function renderSummary(finished){
+    summaryDate.textContent = formatDate(finished.date);
+    var sorted = finished.players.slice().sort(function(a,b){ return a.total - b.total; });
+    summaryList.innerHTML = "";
+    sorted.forEach(function(p, i){
+      var item = document.createElement("div");
+      item.className = "rank-item" + (i===0 ? " first" : "");
+      var pos = document.createElement("div");
+      pos.className = "rank-pos";
+      pos.textContent = (i+1);
+      var name = document.createElement("div");
+      name.className = "rank-name";
+      name.textContent = p.name;
+      var total = document.createElement("div");
+      total.className = "rank-total";
+      total.textContent = p.total;
+      item.appendChild(pos); item.appendChild(name); item.appendChild(total);
+      summaryList.appendChild(item);
+    });
+  }
+
+  // ---------- HISTORY VIEW ----------
+  var historyList = $("history-list");
+
+  function renderHistory(){
+    historyList.innerHTML = "";
+    if(state.rounds.length === 0){
+      var empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Noch keine Runden gespeichert.";
+      historyList.appendChild(empty);
+      return;
+    }
+    state.rounds.forEach(function(round){
+      var card = document.createElement("div");
+      card.className = "card round-card clickable";
+      card.addEventListener("click", function(){ openDetail(round.id); });
+
+      var head = document.createElement("div");
+      head.className = "round-head";
+      var date = document.createElement("div");
+      date.className = "round-date";
+      date.textContent = formatDate(round.date);
+      var trash = document.createElement("button");
+      trash.className = "trash";
+      trash.textContent = "🗑";
+      trash.setAttribute("aria-label", "Runde löschen");
+      trash.addEventListener("click", function(e){
+        e.stopPropagation();
+        state.confirmRoundId = (state.confirmRoundId === round.id) ? null : round.id;
+        renderHistory();
+      });
+      head.appendChild(date); head.appendChild(trash);
+      card.appendChild(head);
+
+      var sorted = round.players.slice().sort(function(a,b){ return a.total - b.total; });
+      var list = document.createElement("div");
+      list.className = "rank-list";
+      sorted.forEach(function(p, i){
+        var item = document.createElement("div");
+        item.className = "rank-item" + (i===0 ? " first" : "");
+        var pos = document.createElement("div");
+        pos.className = "rank-pos"; pos.textContent = (i+1);
+        var name = document.createElement("div");
+        name.className = "rank-name"; name.textContent = p.name;
+        var total = document.createElement("div");
+        total.className = "rank-total"; total.textContent = p.total;
+        item.appendChild(pos); item.appendChild(name); item.appendChild(total);
+        list.appendChild(item);
+      });
+      card.appendChild(list);
+
+      var hint = document.createElement("div");
+      hint.className = "chevron";
+      hint.style.textAlign = "right";
+      hint.style.marginTop = "8px";
+      hint.textContent = "Details ansehen ›";
+      card.appendChild(hint);
+
+      if(state.confirmRoundId === round.id){
+        var confirmRow = document.createElement("div");
+        confirmRow.className = "confirm-row";
+        confirmRow.addEventListener("click", function(e){ e.stopPropagation(); });
+        var span = document.createElement("span");
+        span.textContent = "Runde löschen?";
+        var cancelBtn = document.createElement("button");
+        cancelBtn.className = "btn-sm cancel";
+        cancelBtn.textContent = "Abbrechen";
+        cancelBtn.addEventListener("click", function(){ state.confirmRoundId = null; renderHistory(); });
+        var confirmBtn = document.createElement("button");
+        confirmBtn.className = "btn-sm confirm";
+        confirmBtn.textContent = "Löschen";
+        confirmBtn.addEventListener("click", function(){
+          state.rounds = state.rounds.filter(function(r){ return r.id !== round.id; });
+          lsSet(LS_ROUNDS, state.rounds);
+          state.confirmRoundId = null;
+          renderHistory();
+          showToast("Runde gelöscht");
+        });
+        confirmRow.appendChild(span);
+        confirmRow.appendChild(cancelBtn);
+        confirmRow.appendChild(confirmBtn);
+        card.appendChild(confirmRow);
+      }
+
+      historyList.appendChild(card);
+    });
+  }
+
+  // ---------- DETAIL VIEW ----------
+  var detailBack = $("detail-back");
+  var detailDate = $("detail-date");
+  var detailTabs = $("detail-tabs");
+  var detailStats = $("detail-stats");
+  var detailStationlist = $("detail-stationlist");
+
+  function openDetail(roundId){
+    state.detailRoundId = roundId;
+    state.detailPlayerIndex = 0;
+    goto("detail");
+  }
+  detailBack.addEventListener("click", function(){ goto("history"); });
+
+  function stationSum(row){
+    var s = 0;
+    for(var i=0;i<row.length;i++){ if(row[i]) s += row[i]; }
+    return s;
+  }
+
+  function renderDetail(){
+    var round = state.rounds.find(function(r){ return r.id === state.detailRoundId; });
+    if(!round){ goto("history"); return; }
+
+    detailDate.textContent = formatDate(round.date);
+
+    detailTabs.innerHTML = "";
+    round.players.forEach(function(p, i){
+      var tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "tab" + (i === state.detailPlayerIndex ? " active" : "");
+      tab.textContent = p.name;
+      tab.addEventListener("click", function(){
+        state.detailPlayerIndex = i;
+        renderDetail();
+      });
+      detailTabs.appendChild(tab);
+    });
+
+    var player = round.players[state.detailPlayerIndex];
+
+    // per-station sums, only counting stations that were actually scored
+    var sums = player.stations.map(stationSum);
+    var scoredIdx = [];
+    for(var i=0;i<player.stations.length;i++){
+      var any = player.stations[i].some(function(v){ return !!v; });
+      if(any) scoredIdx.push(i);
+    }
+    var bestIdx = null, worstIdx = null;
+    scoredIdx.forEach(function(i){
+      if(bestIdx === null || sums[i] < sums[bestIdx]) bestIdx = i;
+      if(worstIdx === null || sums[i] > sums[worstIdx]) worstIdx = i;
+    });
+
+    detailStats.innerHTML = "";
+    var totalCard = document.createElement("div");
+    totalCard.className = "stat-card";
+    totalCard.innerHTML = '<div class="stat-label">Gesamt</div><div class="stat-value">' + player.total + ' Punkte</div>';
+    detailStats.appendChild(totalCard);
+
+    if(bestIdx !== null){
+      var bestCard = document.createElement("div");
+      bestCard.className = "stat-card good";
+      bestCard.innerHTML = '<div class="stat-label">Beste Station</div><div class="stat-value">Nr. ' + (bestIdx+1) + ' &middot; ' + sums[bestIdx] + ' Pkt.</div>';
+      detailStats.appendChild(bestCard);
+    }
+    if(worstIdx !== null && worstIdx !== bestIdx){
+      var worstCard = document.createElement("div");
+      worstCard.className = "stat-card bad";
+      worstCard.innerHTML = '<div class="stat-label">Schwächste Station</div><div class="stat-value">Nr. ' + (worstIdx+1) + ' &middot; ' + sums[worstIdx] + ' Pkt.</div>';
+      detailStats.appendChild(worstCard);
+    }
+
+    detailStationlist.innerHTML = "";
+    for(var s=0; s<player.stations.length; s++){
+      var row = document.createElement("div");
+      row.className = "badge-row";
+
+      var no = document.createElement("div");
+      no.className = "station-no";
+      no.textContent = s+1;
+      row.appendChild(no);
+
+      var badges = document.createElement("div");
+      badges.className = "badges";
+      player.stations[s].forEach(function(v){
+        var b = document.createElement("div");
+        b.className = "badge" + (v ? (" v" + v) : "");
+        b.textContent = v ? v : "–";
+        badges.appendChild(b);
+      });
+      row.appendChild(badges);
+
+      var sum = document.createElement("div");
+      sum.className = "row-sum";
+      if(s === bestIdx) sum.classList.add("best");
+      if(s === worstIdx) sum.classList.add("worst");
+      sum.textContent = sums[s];
+      row.appendChild(sum);
+
+      detailStationlist.appendChild(row);
+    }
+  }
+
+  // ---------- modal ----------
+  var modalRoot = $("modal-root");
+  function showModal(opts){
+    modalRoot.innerHTML = "";
+    var backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    var modal = document.createElement("div");
+    modal.className = "modal";
+    var h3 = document.createElement("h3");
+    h3.textContent = opts.title;
+    var p = document.createElement("p");
+    p.textContent = opts.text;
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.className = "secondary";
+    cancel.textContent = "Abbrechen";
+    cancel.style.flex = "1";
+    cancel.addEventListener("click", function(){ modalRoot.innerHTML = ""; });
+    var confirm = document.createElement("button");
+    confirm.className = "primary";
+    confirm.style.flex = "1";
+    confirm.textContent = opts.confirmLabel;
+    if(opts.danger){ confirm.style.background = "var(--danger)"; }
+    confirm.addEventListener("click", function(){
+      modalRoot.innerHTML = "";
+      opts.onConfirm();
+    });
+    row.appendChild(cancel); row.appendChild(confirm);
+    modal.appendChild(h3); modal.appendChild(p); modal.appendChild(row);
+    backdrop.appendChild(modal);
+    backdrop.addEventListener("click", function(e){ if(e.target === backdrop){ modalRoot.innerHTML = ""; } });
+    modalRoot.appendChild(backdrop);
+  }
+
+  function showToast(msg){
+    var t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity = "0"; }, 1600);
+    setTimeout(function(){ t.remove(); }, 1900);
+  }
+
+  // ---------- boot ----------
+  function boot(){
+    var resumed = lsGet(LS_CURRENT);
+    initSetup();
+    if(resumed && resumed.players && resumed.players.length){
+      state.current = resumed;
+      renderScoring();
+      goto("scoring");
+    } else {
+      goto("setup");
+    }
+  }
+
+  boot();
+})();
+</script>
+<script>
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+</script>
+
+</body>
+</html>
