@@ -1,4 +1,4 @@
-const CACHE_NAME = "bogenparcours-v1";
+const CACHE_NAME = "bogenparcours-v2";
 const CORE_ASSETS = [
   "./",
   "./index.html",

@@ -35,6 +35,9 @@
     --v2-bg:#E7F0D9; --v2-fg:#4C6B23;
     --v3-bg:#F5E6C2; --v3-fg:#8A6412;
     --v5-bg:#F6DBD7; --v5-fg:#A3382D;
+    --dist-gelb-bg:#F6E8A8; --dist-gelb-fg:#7A5E06;
+    --dist-blau-bg:#C9DCF3; --dist-blau-fg:#1E4E8C;
+    --dist-rot-bg:#F3CAC5; --dist-rot-fg:#9C2B20;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark){
@@ -55,6 +58,9 @@
       --v2-bg:#333F22; --v2-fg:#C4DA8C;
       --v3-bg:#4A3B1C; --v3-fg:#E8C266;
       --v5-bg:#452420; --v5-fg:#F0958A;
+      --dist-gelb-bg:#4A3E14; --dist-gelb-fg:#EAD27A;
+      --dist-blau-bg:#1E3350; --dist-blau-fg:#9CC0F0;
+      --dist-rot-bg:#4A211C; --dist-rot-fg:#EFA097;
       color-scheme: dark;
     }
   }
@@ -75,6 +81,9 @@
     --v2-bg:#333F22; --v2-fg:#C4DA8C;
     --v3-bg:#4A3B1C; --v3-fg:#E8C266;
     --v5-bg:#452420; --v5-fg:#F0958A;
+    --dist-gelb-bg:#4A3E14; --dist-gelb-fg:#EAD27A;
+    --dist-blau-bg:#1E3350; --dist-blau-fg:#9CC0F0;
+    --dist-rot-bg:#4A211C; --dist-rot-fg:#EFA097;
     color-scheme: dark;
   }
 
@@ -190,11 +199,13 @@
   .total-label{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
   .progress-pill{ font-size:12px; font-weight:700; color:var(--muted); }
 
-  .station-row{
-    display:flex; align-items:center; gap:10px;
+  .station-block{
     padding:10px 0; border-bottom:1px solid var(--border);
   }
-  .station-row:last-child{ border-bottom:none; }
+  .station-block:last-child{ border-bottom:none; }
+  .station-row{
+    display:flex; align-items:center; gap:10px;
+  }
   .station-no{
     width:30px; flex:0 0 auto; font-size:13px; font-weight:800; color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -207,11 +218,32 @@
     width:30px; flex:0 0 auto; text-align:right; font-weight:800; font-variant-numeric:tabular-nums;
     color:var(--text); font-size:14px;
   }
+  .dist-row{
+    display:flex; align-items:center; gap:10px; margin-top:6px;
+  }
+  .dist-row .dist-spacer{ width:30px; flex:0 0 auto; }
+  .dist-select{
+    width:auto; min-width:0; flex:0 0 auto;
+    padding:5px 10px; font-size:12px; font-weight:700; border-radius:8px;
+    background:var(--surface-2); color:var(--muted); border:1px solid var(--border);
+  }
+  .dist-select.dist-gelb{ background:var(--dist-gelb-bg); color:var(--dist-gelb-fg); border-color:transparent; }
+  .dist-select.dist-blau{ background:var(--dist-blau-bg); color:var(--dist-blau-fg); border-color:transparent; }
+  .dist-select.dist-rot{ background:var(--dist-rot-bg); color:var(--dist-rot-fg); border-color:transparent; }
   .target-legend{
     display:flex; gap:10px; font-size:11px; color:var(--muted); padding:2px 0 12px;
     flex-wrap:wrap;
   }
   .target-legend b{ color:var(--text); }
+  .dist-chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:30px; height:20px; padding:0 6px; border-radius:6px;
+    font-size:10px; font-weight:800; flex:0 0 auto;
+    background:var(--surface-2); color:var(--muted);
+  }
+  .dist-chip.dist-gelb{ background:var(--dist-gelb-bg); color:var(--dist-gelb-fg); }
+  .dist-chip.dist-blau{ background:var(--dist-blau-bg); color:var(--dist-blau-fg); }
+  .dist-chip.dist-rot{ background:var(--dist-rot-bg); color:var(--dist-rot-fg); }
 
   /* Bottom nav */
   .bottomnav{
@@ -296,6 +328,7 @@
   }
   .badge-row:last-child{ border-bottom:none; }
   .badge-row .station-no{ width:30px; }
+  .badge-row .dist-chip{ flex:0 0 auto; margin-right:-2px; }
   .badges{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
   .badge{
     height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
@@ -372,6 +405,7 @@
     <div class="target-legend">
       <span><b>1–3</b> = Treffer beim 1./2./3. Schuss</span>
       <span><b>5</b> = kein Treffer</span>
+      <span><span class="dist-chip dist-gelb">Gelb</span> nah &middot; <span class="dist-chip dist-blau">Blau</span> mittel &middot; <span class="dist-chip dist-rot">Rot</span> weit</span>
     </div>
     <div class="card" id="station-list" style="padding:4px 14px;"></div>
     <div style="height:16px"></div>
@@ -413,6 +447,7 @@
     <div class="badge-legend">
       <span><span class="chip" style="background:var(--v1-bg);color:var(--v1-fg);">1</span>–<span class="chip" style="background:var(--v3-bg);color:var(--v3-fg);">3</span> Treffer beim 1./2./3. Schuss</span>
       <span><span class="chip" style="background:var(--v5-bg);color:var(--v5-fg);">5</span>kein Treffer</span>
+      <span><span class="dist-chip dist-gelb">G</span><span class="dist-chip dist-blau">B</span><span class="dist-chip dist-rot">R</span> Distanz</span>
     </div>
     <div class="card" id="detail-stationlist" style="padding:4px 14px;"></div>
   </section>
@@ -459,7 +494,7 @@
     view: "setup", // setup | scoring | summary | history | detail
     current: null, // in-progress round
     lastFinished: null,
-    rounds: lsGet(LS_ROUNDS) || [],
+    rounds: [],
     confirmRoundId: null, // for history delete confirm
     detailRoundId: null,
     detailPlayerIndex: 0
@@ -483,15 +518,36 @@
 
   function emptyStations(){
     var arr = [];
-    for(var i=0;i<N_STATIONS;i++){ arr.push([null,null,null,null]); }
+    for(var i=0;i<N_STATIONS;i++){ arr.push({ targets:[null,null,null,null], distance:null }); }
     return arr;
   }
+
+  // Older saved rounds stored a station as a plain array [t1,t2,t3,t4].
+  // Normalize to { targets, distance } so old history keeps working.
+  function normalizeStation(st){
+    if(Array.isArray(st)) return { targets: st.slice(0,N_TARGETS), distance: null };
+    if(st && Array.isArray(st.targets)) return st;
+    return { targets:[null,null,null,null], distance:null };
+  }
+  function normalizeStations(stations){
+    return (stations || []).map(normalizeStation);
+  }
+  function normalizeRound(round){
+    round.players = (round.players || []).map(function(p){
+      p.stations = normalizeStations(p.stations);
+      return p;
+    });
+    return round;
+  }
+
+  state.rounds = (lsGet(LS_ROUNDS) || []).map(normalizeRound);
 
   function playerTotal(stations){
     var sum = 0;
     for(var i=0;i<stations.length;i++){
-      for(var j=0;j<stations[i].length;j++){
-        var v = stations[i][j];
+      var t = stations[i].targets;
+      for(var j=0;j<t.length;j++){
+        var v = t[j];
         if(v){ sum += v; }
       }
     }
@@ -500,8 +556,9 @@
   function stationsFilledCount(stations){
     var c = 0;
     for(var i=0;i<stations.length;i++){
+      var t = stations[i].targets;
       var any=false;
-      for(var j=0;j<stations[i].length;j++){ if(stations[i][j]){ any=true; } }
+      for(var j=0;j<t.length;j++){ if(t[j]){ any=true; } }
       if(any) c++;
     }
     return c;
@@ -674,6 +731,9 @@
     stationList.innerHTML = "";
     for(var s=0; s<N_STATIONS; s++){
       (function(s){
+        var block = document.createElement("div");
+        block.className = "station-block";
+
         var row = document.createElement("div");
         row.className = "station-row";
 
@@ -695,10 +755,10 @@
               opt.textContent = o === "" ? "–" : o;
               sel.appendChild(opt);
             });
-            var val = active.stations[s][t];
+            var val = active.stations[s].targets[t];
             sel.value = val ? String(val) : "";
             sel.addEventListener("change", function(){
-              active.stations[s][t] = sel.value ? parseInt(sel.value,10) : null;
+              active.stations[s].targets[t] = sel.value ? parseInt(sel.value,10) : null;
               lsSet(LS_CURRENT, round);
               rowSum.textContent = sumRow(active.stations[s]);
               scoringTotal.textContent = playerTotal(active.stations);
@@ -714,13 +774,52 @@
         rowSum.textContent = sumRow(active.stations[s]);
         row.appendChild(rowSum);
 
-        stationList.appendChild(row);
+        block.appendChild(row);
+
+        var distRow = document.createElement("div");
+        distRow.className = "dist-row";
+        var spacer = document.createElement("div");
+        spacer.className = "dist-spacer";
+        distRow.appendChild(spacer);
+
+        var distSel = document.createElement("select");
+        distSel.className = "dist-select";
+        distSel.setAttribute("aria-label", "Station " + (s+1) + " Distanz");
+        var distOpts = [
+          { v: "", label: "Distanz –" },
+          { v: "gelb", label: "Gelb (nah)" },
+          { v: "blau", label: "Blau (mittel)" },
+          { v: "rot", label: "Rot (weit)" }
+        ];
+        distOpts.forEach(function(o){
+          var opt = document.createElement("option");
+          opt.value = o.v;
+          opt.textContent = o.label;
+          distSel.appendChild(opt);
+        });
+        var distVal = active.stations[s].distance;
+        distSel.value = distVal || "";
+        distSel.classList.toggle("dist-gelb", distVal === "gelb");
+        distSel.classList.toggle("dist-blau", distVal === "blau");
+        distSel.classList.toggle("dist-rot", distVal === "rot");
+        distSel.addEventListener("change", function(){
+          active.stations[s].distance = distSel.value || null;
+          distSel.classList.toggle("dist-gelb", distSel.value === "gelb");
+          distSel.classList.toggle("dist-blau", distSel.value === "blau");
+          distSel.classList.toggle("dist-rot", distSel.value === "rot");
+          lsSet(LS_CURRENT, round);
+        });
+        distRow.appendChild(distSel);
+        block.appendChild(distRow);
+
+        stationList.appendChild(block);
       })(s);
     }
   }
-  function sumRow(row){
+  function sumRow(station){
+    var t = station.targets;
     var s = 0;
-    for(var i=0;i<row.length;i++){ if(row[i]) s += row[i]; }
+    for(var i=0;i<t.length;i++){ if(t[i]) s += t[i]; }
     return s;
   }
 
@@ -893,11 +992,13 @@
   }
   detailBack.addEventListener("click", function(){ goto("history"); });
 
-  function stationSum(row){
+  function stationSum(station){
+    var t = station.targets;
     var s = 0;
-    for(var i=0;i<row.length;i++){ if(row[i]) s += row[i]; }
+    for(var i=0;i<t.length;i++){ if(t[i]) s += t[i]; }
     return s;
   }
+  var DIST_LABEL = { gelb:"G", blau:"B", rot:"R" };
 
   function renderDetail(){
     var round = state.rounds.find(function(r){ return r.id === state.detailRoundId; });
@@ -924,7 +1025,7 @@
     var sums = player.stations.map(stationSum);
     var scoredIdx = [];
     for(var i=0;i<player.stations.length;i++){
-      var any = player.stations[i].some(function(v){ return !!v; });
+      var any = player.stations[i].targets.some(function(v){ return !!v; });
       if(any) scoredIdx.push(i);
     }
     var bestIdx = null, worstIdx = null;
@@ -962,9 +1063,15 @@
       no.textContent = s+1;
       row.appendChild(no);
 
+      var dist = player.stations[s].distance;
+      var distChip = document.createElement("div");
+      distChip.className = "dist-chip" + (dist ? (" dist-" + dist) : "");
+      distChip.textContent = dist ? DIST_LABEL[dist] : "–";
+      row.appendChild(distChip);
+
       var badges = document.createElement("div");
       badges.className = "badges";
-      player.stations[s].forEach(function(v){
+      player.stations[s].targets.forEach(function(v){
         var b = document.createElement("div");
         b.className = "badge" + (v ? (" v" + v) : "");
         b.textContent = v ? v : "–";
@@ -1032,7 +1139,7 @@
     var resumed = lsGet(LS_CURRENT);
     initSetup();
     if(resumed && resumed.players && resumed.players.length){
-      state.current = resumed;
+      state.current = normalizeRound(resumed);
       renderScoring();
       goto("scoring");
     } else {
