@@ -361,6 +361,29 @@
   .modal h3{ margin-bottom:8px; }
   .modal p{ color:var(--muted); font-size:13px; margin:0 0 16px; }
   .modal .row{ display:flex; gap:10px; }
+
+  /* Quick entry */
+  .quick-link{
+    display:block; width:100%; text-align:center;
+    background:none; border:none; color:var(--muted); font-family:inherit;
+    font-size:13px; font-weight:700; cursor:pointer; padding:10px; text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .quick-badge{
+    display:inline-flex; align-items:center; font-size:10px; font-weight:800;
+    letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
+    background:var(--surface-2); border-radius:6px; padding:2px 7px; margin-left:8px;
+  }
+  .quick-summary{
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+    text-align:center; padding:18px 4px;
+  }
+  .quick-summary .total-num{ font-size:34px; }
+  .quick-summary .stat-row{ display:flex; gap:20px; }
+  .quick-summary .stat-row div{ font-size:13px; color:var(--muted); }
+  .quick-summary .stat-row b{ display:block; color:var(--text); font-size:15px; }
 </style>
 </head>
 <body>
@@ -388,6 +411,44 @@
     </div>
     <div style="height:16px"></div>
     <button class="primary" id="start-round">Runde starten</button>
+    <button class="quick-link" id="open-quick" type="button">Ergebnis nachtragen (ohne Details)</button>
+  </section>
+
+  <!-- QUICK ENTRY VIEW -->
+  <section id="view-quick" hidden>
+    <div class="card stack">
+      <div class="field">
+        <label for="quick-name">Name</label>
+        <input type="text" id="quick-name" placeholder="Schütze">
+      </div>
+      <div class="field">
+        <label for="quick-date">Datum</label>
+        <input type="date" id="quick-date">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="quick-stations">Stationen</label>
+          <input type="text" inputmode="numeric" id="quick-stations" placeholder="32">
+        </div>
+        <div class="field">
+          <label for="quick-total">Gesamtpunkte</label>
+          <input type="text" inputmode="numeric" id="quick-total" placeholder="z. B. 78">
+        </div>
+      </div>
+      <div class="field">
+        <label for="quick-distance">Distanz</label>
+        <select id="quick-distance">
+          <option value="">Keine Angabe</option>
+          <option value="gelb">Gelb (nah)</option>
+          <option value="blau">Blau (mittel)</option>
+          <option value="rot">Rot (weit)</option>
+        </select>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <button class="primary" id="quick-save">Ergebnis speichern</button>
+    <div style="height:8px"></div>
+    <button class="ghost" id="quick-cancel" style="width:100%;">Abbrechen</button>
   </section>
 
   <!-- SCORING VIEW -->
@@ -444,7 +505,7 @@
     </div>
     <div class="tabs" id="detail-tabs"></div>
     <div class="detail-stats" id="detail-stats"></div>
-    <div class="badge-legend">
+    <div class="badge-legend" id="detail-legend">
       <span><span class="chip" style="background:var(--v1-bg);color:var(--v1-fg);">1</span>–<span class="chip" style="background:var(--v3-bg);color:var(--v3-fg);">3</span> Treffer beim 1./2./3. Schuss</span>
       <span><span class="chip" style="background:var(--v5-bg);color:var(--v5-fg);">5</span>kein Treffer</span>
       <span><span class="dist-chip dist-gelb">G</span><span class="dist-chip dist-blau">B</span><span class="dist-chip dist-rot">R</span> Distanz</span>
@@ -571,6 +632,7 @@
   var viewSummary = $("view-summary");
   var viewHistory = $("view-history");
   var viewDetail = $("view-detail");
+  var viewQuick = $("view-quick");
   var navRound = $("nav-round");
   var navHistory = $("nav-history");
   var subtitle = $("subtitle");
@@ -581,6 +643,7 @@
     viewSummary.hidden = true;
     viewHistory.hidden = true;
     viewDetail.hidden = true;
+    viewQuick.hidden = true;
 
     if(state.view === "detail"){
       viewDetail.hidden = false;
@@ -606,6 +669,9 @@
     if(state.view === "setup"){
       viewSetup.hidden = false;
       subtitle.textContent = "Neue Runde anlegen";
+    } else if(state.view === "quick"){
+      viewQuick.hidden = false;
+      subtitle.textContent = "Ergebnis nachtragen";
     } else if(state.view === "scoring"){
       viewScoring.hidden = false;
       subtitle.textContent = formatDate(state.current.date) + " · 32 Stationen";
@@ -694,6 +760,69 @@
     lsSet(LS_CURRENT, round);
     renderScoring();
     goto("scoring");
+  });
+
+  // ---------- QUICK ENTRY VIEW ----------
+  var openQuickBtn = $("open-quick");
+  var quickName = $("quick-name");
+  var quickDate = $("quick-date");
+  var quickStations = $("quick-stations");
+  var quickTotal = $("quick-total");
+  var quickDistance = $("quick-distance");
+  var quickSaveBtn = $("quick-save");
+  var quickCancelBtn = $("quick-cancel");
+
+  function initQuick(){
+    quickName.value = "";
+    quickDate.value = todayISO();
+    quickStations.value = "";
+    quickTotal.value = "";
+    quickDistance.value = "";
+  }
+
+  openQuickBtn.addEventListener("click", function(){
+    initQuick();
+    goto("quick");
+  });
+  quickCancelBtn.addEventListener("click", function(){ goto("setup"); });
+
+  quickSaveBtn.addEventListener("click", function(){
+    var name = quickName.value.trim() || "Schütze";
+    var date = quickDate.value || todayISO();
+    var stationsRaw = quickStations.value.trim();
+    var totalRaw = quickTotal.value.trim();
+    var stationsNum = stationsRaw ? parseInt(stationsRaw, 10) : null;
+    var totalNum = totalRaw ? parseInt(totalRaw, 10) : null;
+
+    if(totalNum === null || isNaN(totalNum) || totalNum < 0){
+      showToast("Bitte Gesamtpunkte angeben");
+      quickTotal.focus();
+      return;
+    }
+    if(stationsNum !== null && (isNaN(stationsNum) || stationsNum < 1 || stationsNum > N_STATIONS)){
+      showToast("Stationen: 1–" + N_STATIONS);
+      quickStations.focus();
+      return;
+    }
+
+    var round = {
+      id: uid(),
+      date: date,
+      quick: true,
+      players: [{
+        name: name,
+        quick: true,
+        stationsPlayed: stationsNum,
+        distance: quickDistance.value || null,
+        total: totalNum,
+        stations: emptyStations()
+      }]
+    };
+    state.rounds.unshift(round);
+    lsSet(LS_ROUNDS, state.rounds);
+    initSetup();
+    goto("history");
+    showToast("Ergebnis gespeichert");
   });
 
   // ---------- SCORING VIEW ----------
@@ -912,6 +1041,12 @@
       var date = document.createElement("div");
       date.className = "round-date";
       date.textContent = formatDate(round.date);
+      if(round.quick){
+        var qb = document.createElement("span");
+        qb.className = "quick-badge";
+        qb.textContent = "Nachtrag";
+        date.appendChild(qb);
+      }
       var trash = document.createElement("button");
       trash.className = "trash";
       trash.textContent = "🗑";
@@ -984,6 +1119,7 @@
   var detailTabs = $("detail-tabs");
   var detailStats = $("detail-stats");
   var detailStationlist = $("detail-stationlist");
+  var detailLegend = $("detail-legend");
 
   function openDetail(roundId){
     state.detailRoundId = roundId;
@@ -1020,6 +1156,45 @@
     });
 
     var player = round.players[state.detailPlayerIndex];
+    detailLegend.hidden = !!player.quick;
+
+    if(player.quick){
+      detailStats.innerHTML = "";
+      detailStationlist.innerHTML = "";
+      var wrap = document.createElement("div");
+      wrap.className = "quick-summary";
+
+      var lbl = document.createElement("div");
+      lbl.className = "total-label";
+      lbl.textContent = "Gesamt";
+      var num = document.createElement("div");
+      num.className = "total-num";
+      num.textContent = player.total;
+      wrap.appendChild(lbl);
+      wrap.appendChild(num);
+
+      var statRow = document.createElement("div");
+      statRow.className = "stat-row";
+      var stationsDiv = document.createElement("div");
+      stationsDiv.innerHTML = '<b>' + (player.stationsPlayed || "–") + '</b>Stationen';
+      statRow.appendChild(stationsDiv);
+      var distDiv = document.createElement("div");
+      var distChipHtml = player.distance
+        ? '<span class="dist-chip dist-' + player.distance + '">' + DIST_LABEL[player.distance] + '</span>'
+        : "–";
+      distDiv.innerHTML = '<b>' + distChipHtml + '</b>Distanz';
+      statRow.appendChild(distDiv);
+      wrap.appendChild(statRow);
+
+      var note = document.createElement("div");
+      note.className = "app-sub";
+      note.style.marginTop = "4px";
+      note.textContent = "Nachtrag ohne Stationsdetails";
+      wrap.appendChild(note);
+
+      detailStationlist.appendChild(wrap);
+      return;
+    }
 
     // per-station sums, only counting stations that were actually scored
     var sums = player.stations.map(stationSum);
